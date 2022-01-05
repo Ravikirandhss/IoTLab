@@ -1,0 +1,54 @@
+#include<ThingSpeak.h>
+#include<WiFi.h>
+const int trigpin=16;
+const int echopin=17;
+const char *ssid="Ravi";
+const char *password="ravikirandhss";
+float distance,duration;
+const char *WriteAPI="9ZQJK2L65A3LSYOK";
+unsigned long channelId=1626128;
+WiFiClient client;
+void setup() 
+{
+  Serial.begin(115200);
+  pinMode(trigpin,OUTPUT);
+  pinMode(echopin,INPUT);
+  delay(10);
+  ThingSpeak.begin(client);
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+void upload()
+{
+  ThingSpeak.setField(1,distance);
+  int x=ThingSpeak.writeFields(channelId,WriteAPI);
+  if(x==200)
+  {
+    Serial.println("Successfully  Uploaded");
+  }
+}
+void loop() 
+{
+  digitalWrite(trigpin,LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigpin,HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigpin,LOW);
+  duration=pulseIn(echopin,HIGH);
+  distance=duration*0.034/2;
+  Serial.print("Distance=");
+  Serial.println(distance);
+  upload();
+  delay(5000);
+
+}
